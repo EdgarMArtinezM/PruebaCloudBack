@@ -1,0 +1,6 @@
+Para poder correr el BACK, es necesario ejecutar los siguientes comandos 
+
+npm i 
+npm run start
+
+Verificar que el servicor este coorriendo con el log Servidor escuchando en http://localhost:8080
