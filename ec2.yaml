@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Crear una instancia EC2 Amazon Linux t2.micro e instalar Python 3
+
+Parameters:
+  KeyName:
+    Description: Nombre del par de llaves EC2 para acceso SSH
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: Debe ser un nombre válido de par de llaves existente en tu cuenta.
+
+Resources:
+  PythonEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: !Ref KeyName
+      ImageId: ami-0c02fb55956c7d316  # Amazon Linux 2 (us-east-1), puedes cambiarla según la región
+      SecurityGroups:
+        - !Ref InstanceSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y python3
+          python3 --version > /home/ec2-user/python_version.txt
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permitir acceso SSH desde cualquier IP (no recomendado para producción)
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  InstanceId:
+    Description: ID de la instancia creada
+    Value: !Ref PythonEC2Instance
+
+  PublicIP:
+    Description: Dirección IP pública de la instancia
+    Value: !GetAtt PythonEC2Instance.PublicIp
